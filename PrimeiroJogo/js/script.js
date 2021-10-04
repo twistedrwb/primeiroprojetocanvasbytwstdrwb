@@ -30,12 +30,11 @@ window.onload = function(){
 }
 
 var entJogador;
-var entObstaculo;
+var entObstaculo = [];
 
 function iniciarJogo(){
     espacoJogo.inicio();
-    entJogador = new proprComponente('#000', 50, 50, 50, 200);
-    entObstaculo = new proprComponente('#f00', 300, 20, 800, 100);
+    entJogador = new proprComponente('#000', 35, 35, 50, 200);
 }
 
 let espacoJogo = {
@@ -45,6 +44,7 @@ let espacoJogo = {
         this.canvas.height = 500,
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+        this.frame = 0;
         this.interval = setInterval(updtEspacoJogo, 20);
     },
     clearSpace: function(){
@@ -55,6 +55,16 @@ let espacoJogo = {
     }
 }
 
+//Conta intervalos
+function countInterval(n){
+    if((espacoJogo.frame / n ) % 1 == 0){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+//Propriedades dos componentes
 function proprComponente(cor, largura, altura, x, y){
     this.altura = altura,
     this.largura = largura,
@@ -72,13 +82,14 @@ function proprComponente(cor, largura, altura, x, y){
         this.y += this.speedY;
     }
 
+    //Propriedades das colisões dos componentes
     this.entCollision = function(ent){
-        //posição do personagem
+        //Posição do personagem
         let leftside = this.x;
         let rightside = this.x + this.largura;
         let topside = this.y;
         let downside = this.y + this.altura;
-        //posição do obstaculo
+        //Posição do obstaculo
         let entLeftside = ent.x;
         let entRightside = ent.x + ent.altura;
         let entTopside = ent.y;
@@ -86,7 +97,7 @@ function proprComponente(cor, largura, altura, x, y){
     
         let Collide = true;
     
-        //verifica se NÃO bateu.
+        //Verifica se NÃO bateu.
         if((downside < entTopside) || (topside > entDownside) || (rightside < entLeftside) || (leftside > entRightside)){
             Collide = false;
         }
@@ -95,33 +106,53 @@ function proprComponente(cor, largura, altura, x, y){
     } 
 }
 
+//Atualiza a area do jogo para cada ação
 function updtEspacoJogo(){
-    if(entJogador.entCollision(entObstaculo)){
-        espacoJogo.stopGame();
-    }else{
+
+    let x, y;
+
+    for(i = 0; i < entObstaculo.length; i++){
+        if(entJogador.entCollision(entObstaculo[i])){
+            espacoJogo.stopGame();
+        }
+    }
+
     espacoJogo.clearSpace();
+    espacoJogo.frame += 1;
+    if(espacoJogo.frame == 1 || countInterval(150)){
+        x = espacoJogo.canvas.width;
+        minAltura = 20;
+        maxAltura = 200;
+        altura = Math.floor(Math.random()*(maxAltura-minAltura+1)+minAltura);
+        minVazio = 50;
+        maxVazio = 200;
+        vazio = Math.floor(Math.random()*(maxVazio-minVazio+1)+minVazio);
+        entObstaculo.push(new proprComponente('#f00', altura, 10, x, 0));
+        entObstaculo.push(new proprComponente('#f00', x-altura-vazio, 10, x, altura+vazio));
+    }
+
+    for(i = 0; i < entObstaculo.length; i++){
+        entObstaculo[i].x -= 1;
+        entObstaculo[i].updtPosition();
+    }
+
     entJogador.newPosition();
     entJogador.updtPosition();
-    entObstaculo.updtPosition();
-    }
 }
 
+//Movimentação do jogador
 function moveUp(){
-    entJogador.speedY -= 1;
+    entJogador.speedY -= 3;
 }
-
 function moveDown(){
-    entJogador.speedY += 1;
+    entJogador.speedY += 3;
 }
-
 function moveLeft(){
-    entJogador.speedX -= 1;
+    entJogador.speedX -= 3;
 }
-
 function moveRight(){
-    entJogador.speedX += 1;
+    entJogador.speedX += 3;
 }
-
 function movemntBrake(){
     entJogador.speedX = 0;
     entJogador.speedY = 0;
