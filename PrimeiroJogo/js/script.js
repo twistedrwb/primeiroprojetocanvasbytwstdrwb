@@ -31,10 +31,12 @@ window.onload = function(){
 
 var entJogador;
 var entObstaculo = [];
+var entScore;
 
 function iniciarJogo(){
     espacoJogo.inicio();
-    entJogador = new proprComponente('#000', 35, 35, 50, 200);
+    entJogador = new proprComponente('white', 35, 35, 50, 200);
+    entScore = new proprComponente('white', 'Consolas', '30px', 450, 40, 'Texto');
 }
 
 let espacoJogo = {
@@ -65,17 +67,25 @@ function countInterval(n){
 }
 
 //Propriedades dos componentes
-function proprComponente(cor, largura, altura, x, y){
+function proprComponente(cor, largura, altura, x, y, tipo){
+    this.tipo = tipo;
     this.altura = altura,
     this.largura = largura,
     this.x = x,
     this.y = y,
+    this.texto = 0;
     this.speedX = 0,
     this.speedY = 0,
     this.updtPosition = function(){
         contexto = espacoJogo.context;
-        contexto.fillStyle = cor;
-        contexto.fillRect(this.x, this.y, this.altura, this.largura);
+        if(this.tipo == 'Texto'){
+            contexto.font = this.altura + " " + this.largura;
+            contexto.fillStyle = cor;
+            contexto.fillText(this.texto, this.x, this.y);
+        }else{
+            contexto.fillStyle = cor;
+            contexto.fillRect(this.x, this.y, this.altura, this.largura);
+        }
     }
     this.newPosition = function(){
         this.x += this.speedX;
@@ -119,7 +129,7 @@ function updtEspacoJogo(){
 
     espacoJogo.clearSpace();
     espacoJogo.frame += 1;
-    if(espacoJogo.frame == 1 || countInterval(150)){
+    if(espacoJogo.frame == 1 || countInterval(100)){
         x = espacoJogo.canvas.width;
         minAltura = 20;
         maxAltura = 200;
@@ -127,15 +137,16 @@ function updtEspacoJogo(){
         minVazio = 50;
         maxVazio = 200;
         vazio = Math.floor(Math.random()*(maxVazio-minVazio+1)+minVazio);
-        entObstaculo.push(new proprComponente('#f00', altura, 10, x, 0));
-        entObstaculo.push(new proprComponente('#f00', x-altura-vazio, 10, x, altura+vazio));
+        entObstaculo.push(new proprComponente('white', altura, 10, x, 0));
+        entObstaculo.push(new proprComponente('white', x-altura-vazio, 10, x, altura+vazio));
     }
 
     for(i = 0; i < entObstaculo.length; i++){
-        entObstaculo[i].x -= 1;
+        entObstaculo[i].x -= 3;
         entObstaculo[i].updtPosition();
     }
-
+    entScore.texto = "Score: " + espacoJogo.frame;
+    entScore.updtPosition();
     entJogador.newPosition();
     entJogador.updtPosition();
 }
